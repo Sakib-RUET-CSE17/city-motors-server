@@ -17,11 +17,20 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     console.log('connection err', err)
     const bikeCollection = client.db(process.env.DB_NAME).collection("bikes");
+    const ordersCollection = client.db(process.env.DB_NAME).collection("orders");
 
     app.get('/bikes', (req, res) => {
         bikeCollection.find({})
             .toArray((err, items) => {
                 res.send(items)
+            })
+    })
+
+    app.get('/bike/:id', (req, res) => {
+        console.log()
+        bikeCollection.find({ _id: ObjectID(req.params.id) })
+            .toArray((err, items) => {
+                res.send(items[0])
             })
     })
 
@@ -51,6 +60,24 @@ client.connect(err => {
         )
             .then(result => {
                 res.send(result.modifiedCount > 0)
+            })
+    })
+
+    app.post('/addOrder', (req, res) => {
+        const order = req.body
+        console.log(order)
+        ordersCollection.insertOne(order)
+            .then(result => {
+                console.log(result.insertedCount)
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+    app.get('/orders', (req, res) => {
+        const queryEmail = req.query.email
+        ordersCollection.find({ email: queryEmail })
+            .toArray((err, documents) => {
+                res.send(documents)
             })
     })
 });
