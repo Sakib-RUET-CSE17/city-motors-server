@@ -41,10 +41,22 @@ client.connect(err => {
         bikeCollection.findOneAndDelete({ _id: id })
             .then(documents => res.send(!!documents.value))
     })
+
+    app.patch('/updateBike/:id', (req, res) => {
+        console.log(req.body)
+        bikeCollection.updateOne({ _id: ObjectID(req.params.id) },
+            {
+                $set: { price: req.body.price }
+            }
+        )
+            .then(result => {
+                res.send(result.modifiedCount > 0)
+            })
+    })
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+    res.send('Hello World!')
 })
 
 app.listen(port)
